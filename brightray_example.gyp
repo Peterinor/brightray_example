@@ -40,9 +40,6 @@
       }],
     ],
   },
-  'includes': [
-    'vendor/brightray/brightray.gypi',
-  ],
   'targets': [
     {
       'target_name': '<(project_name)',
@@ -99,16 +96,36 @@
         ['OS=="win"', {
           'copies': [
             {
+              'variables': {
+                'conditions': [
+                  ['libchromiumcontent_component', {
+                    'copied_libraries': [
+                      '<@(libchromiumcontent_shared_libraries)',
+                      '<@(libchromiumcontent_shared_v8_libraries)',
+                    ],
+                  }, {
+                    'copied_libraries': [],
+                  }],
+                ],
+              },
               'destination': '<(PRODUCT_DIR)',
               'files': [
-                '<(libchromiumcontent_library_dir)/chromiumcontent.dll',
-                '<(libchromiumcontent_library_dir)/content_shell.pak',
-                '<(libchromiumcontent_library_dir)/icudtl.dat',
-                '<(libchromiumcontent_library_dir)/libGLESv2.dll',
+                '<@(copied_libraries)',
+                '<(libchromiumcontent_dir)/ffmpegsumo.dll',
+                '<(libchromiumcontent_dir)/libEGL.dll',
+                '<(libchromiumcontent_dir)/libGLESv2.dll',
+                '<(libchromiumcontent_dir)/icudtl.dat',
+                '<(libchromiumcontent_dir)/content_resources_200_percent.pak',
+                '<(libchromiumcontent_dir)/content_shell.pak',
+                '<(libchromiumcontent_dir)/ui_resources_200_percent.pak',
+                '<(libchromiumcontent_dir)/natives_blob.bin',
+                '<(libchromiumcontent_dir)/snapshot_blob.bin',
+                'external_binaries/d3dcompiler_47.dll',
+                'external_binaries/xinput1_3.dll',
               ],
             },
           ],
-        }],
+        }],  # OS=="win"
       ],
     },
     {
@@ -132,6 +149,36 @@
         'vendor/brightray/brightray.gyp:brightray',
       ],
       'conditions': [
+        ['libchromiumcontent_component', {
+          'link_settings': {
+            'libraries': [ '<@(libchromiumcontent_v8_libraries)' ],
+          },
+        },{
+          'link_settings': {
+            'libraries': [ 
+              '<@(libchromiumcontent_static_libraries)' ,
+              '<@(libchromiumcontent_static_v8_libraries)' ,
+            ],
+          },
+        }],
+        ['OS=="win"', {
+          'link_settings': {
+            'libraries': [
+              '-limm32.lib',
+              '-loleacc.lib',
+              '-lComdlg32.lib',
+              '-lWininet.lib',
+
+              '-lAdvapi32.lib',
+              '-lUser32.lib',
+              '-lgdi32.lib',
+              '-lPsapi.lib', 
+              '-lKernel32.lib',
+              '-lcomctl32.lib'
+            ],
+          }
+        }],  # OS=="win"
+
         ['OS!="linux"', {
           'sources/': [
             ['exclude', '/linux/'],
